@@ -9,12 +9,18 @@
 
 import wx
 import wx.xrc
-import wx.calendar
+try:
+    import wx.calendar
+    cal_object = wx.calendar
+except:
+    import wx.lib.calendar
+    cal_object = wx.lib.calendar
 import sys, os
 import datetime
 from kancolle_deffs import *
 
 TRANSCODE='cp932'
+TITLETEXT = u"艦これ 戦闘ログ閲覧 0.9.1"
 
 ###########################################################################
 ## Class KancolleHistMain
@@ -22,8 +28,8 @@ TRANSCODE='cp932'
 
 class KancolleHistMain ( wx.Frame ):
     
-    def __init__( self, parent ):
-        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"艦これ 戦闘ログ閲覧", pos = wx.DefaultPosition, size = wx.Size( 800,600 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+    def __init__( self, parent, debuglevel=0, infile=None ):
+        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = TITLETEXT, pos = wx.DefaultPosition, size = wx.Size( 800,600 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
         
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         
@@ -144,8 +150,21 @@ class KancolleHistMain ( wx.Frame ):
         
         sbSizer5 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel1, wx.ID_ANY, u"履歴" ), wx.VERTICAL )
         
-        self.m_listCtrl1 = wx.ListCtrl( self.m_panel1, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,200 ), wx.LC_ALIGN_LEFT|wx.LC_HRULES|wx.LC_REPORT|wx.LC_VRULES )
-        sbSizer5.Add( self.m_listCtrl1, 1, wx.ALL|wx.EXPAND, 5 )
+        self.m_listCtrl1 = wx.ListCtrl( self.m_panel1, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,150 ), wx.LC_ALIGN_LEFT|wx.LC_HRULES|wx.LC_REPORT|wx.LC_VRULES )
+        sbSizer5.Add( self.m_listCtrl1, 1, wx.EXPAND, 5 )
+        
+        bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText61 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"List select by :", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText61.Wrap( -1 )
+        bSizer6.Add( self.m_staticText61, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+        
+        self.m_staticSelectStatus = wx.StaticText( self.m_panel1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticSelectStatus.Wrap( -1 )
+        bSizer6.Add( self.m_staticSelectStatus, 0, wx.ALL, 5 )
+        
+        
+        sbSizer5.Add( bSizer6, 0, 0, 5 )
         
         
         bSizer95.Add( sbSizer5, 1, wx.EXPAND, 5 )
@@ -445,8 +464,11 @@ class KancolleHistMain ( wx.Frame ):
         self.m_listCtrl1.Bind( wx.EVT_LIST_ITEM_SELECTED, self.m_listCtrl1OnListItemSelected )
         self.Bind( wx.EVT_CLOSE, self.KancolleHistMainOnClose )
 
+        self._debuglevel = debuglevel
+        self.logfilename = ""
+
         # タイトル設定
-        title = [[u"No", wx.LIST_FORMAT_CENTER, 80],
+        title = [[u"No", wx.LIST_FORMAT_CENTER, 40],
                  [u"年月", wx.LIST_FORMAT_CENTER, 150],
                  [u"海域", wx.LIST_FORMAT_LEFT, 100],
                  [u"マス", wx.LIST_FORMAT_LEFT, 35],
@@ -458,6 +480,9 @@ class KancolleHistMain ( wx.Frame ):
             self.m_listCtrl1.InsertColumn(cindex, column[0], column[1], column[2])
             cindex += 1
 
+        if infile is not None:
+            self.readHistLog(infile)
+
         # 海域選択肢追加
         normal_areas = (u'1-1',
                  u'1-2',
@@ -468,36 +493,29 @@ class KancolleHistMain ( wx.Frame ):
         self.m_comboBoxArea.SetItems(normal_areas)
 
         # イベント選択追加
-        events = (u'通常',
-                  u'14秋',
-                  u'15冬',
-                  u'15春',
-                  u'15夏',
-                  u'15秋',
-                  u'16冬',
-                  u'16春',
-                  u'16夏',
-                  u'16秋',
-                  u'17冬')
-
+        #events = (u'通常',
+        #          u'14秋',
+        #          u'15冬',
+        #          u'15春',
+        #          u'15夏',
+        #          u'15秋',
+        #          u'16冬',
+        #          u'16春',
+        #          u'16夏',
+        #          u'16秋',
+        #          u'17冬')
+        areas = sorted(arealist.keys())
+        events = []
+        area = ""
+        for item in areas:
+            if area == item.split(":")[0]:
+                continue
+            area = item.split(":")[0]
+            events.append(area)
+            
         self.m_comboBoxEvent.SetItems(events)
         self.m_comboBoxEvent.SetSelection(0)
-
-        # 艦種設定
-        shiptypes = (u'戦艦',
-                     u'工作艦',
-                     u'揚陸艦',
-                     u'潜水艦',
-                     u'軽空母',
-                     u'駆逐艦',
-                     u'正規空母',
-                     u'潜水母艦',
-                     u'軽巡洋艦',
-                     u'重巡洋艦')
-        self.m_comboBoxShiptype.SetItems(shiptypes)
-        self.m_comboBoxShiptype.SetSelection(0)
-
-        self.logfilename = ""
+        self.m_comboBoxEventOnCombobox()
 
     def __del__( self ):
         '''
@@ -512,7 +530,8 @@ class KancolleHistMain ( wx.Frame ):
         ending = wx.MessageDialog(self, "End?", "End dialog", wx.YES_NO)
 
         ret = ending.ShowModal()
-        print ret
+        if self._debuglevel >= 1:
+            print ret
         if ret == wx.ID_NO:
             return
         event.Skip()
@@ -527,17 +546,9 @@ class KancolleHistMain ( wx.Frame ):
 
         year = "%s"%date.GetYear()
         month = "%d"%(date.GetMonth() + 1)
-        print "%s年%s月のおおよその戦果"%(year, month)
-        new_format1 = 0
-        new_format2 = 0
+        if self._debuglevel >= 1:
+            print "%s年%s月のおおよその戦果"%(year, month)
         for item in self.hists:
-            if item[1] == str(2016):
-                if item[2] == "12":
-                    if item[3] == "04":
-                        if item[4] == "16:26:02":
-                            new_format1 = 1
-                            new_format2 = 3
-
             if item[1] == date.GetYear():
                 if item[2] == date.GetMonth():
                     pass
@@ -553,7 +564,7 @@ class KancolleHistMain ( wx.Frame ):
         self.readHistLog(histfile)
         event.Skip()
 
-    def m_comboBoxShiptypeOnCombobox( self, event ):
+    def m_comboBoxShiptypeOnCombobox( self, event=None ):
         '''
         検索ボックス、ドロップ艦、艦種選択
         '''
@@ -561,7 +572,7 @@ class KancolleHistMain ( wx.Frame ):
         shiptype = self.m_comboBoxShiptype.GetValue()
         print shiptype
         shipnames = []
-        for item in shiptype_name:
+        for item in self.shiptype_names:
             #print item
             items = item.split(':')
             #print items[0]
@@ -572,7 +583,9 @@ class KancolleHistMain ( wx.Frame ):
         if len(shipnames) != 0:
             self.m_comboBoxShipname.SetItems(shipnames)
             self.m_comboBoxShipname.SetSelection(0)
-        event.Skip()
+
+        if event is not None:
+            event.Skip()
     
     def m_comboBoxShipnameOnCombobox( self, event ):
         '''
@@ -582,7 +595,7 @@ class KancolleHistMain ( wx.Frame ):
 
     def m_buttonGoTypeNameSeachOnButtonClick( self, event ):
         '''
-        検索ボックスの中身で検索
+        ドロップ艦種、艦むすで中身で検索
         '''
 
         shiptype = self.m_comboBoxShiptype.GetValue()
@@ -594,6 +607,7 @@ class KancolleHistMain ( wx.Frame ):
             shipname = ""
 
         self.ListCtrlChangeByDropShip(shiptype, shipname)
+        self.m_staticSelectStatus.SetLabel("Select by ship type and ship name")
         event.Skip()
     
     def m_comboBoxAreaOnCombobox( self, event ):
@@ -602,17 +616,20 @@ class KancolleHistMain ( wx.Frame ):
         '''
 
         area = self.m_comboBoxArea.GetValue()
-        print area
+        if self._debuglevel >= 1:
+            print area
         term = self.m_comboBoxEvent.GetValue()
         self.ListCtrlChangeByArea(term, area)
         event.Skip()
     
-    def m_comboBoxEventOnCombobox( self, event ):
+    def m_comboBoxEventOnCombobox( self, event=None ):
         '''
         海域またはイベント選択動作
         '''
+
         term = self.m_comboBoxEvent.GetValue()
-        print term
+        if self._debuglevel >= 1:
+            print term
         choise = []
         for item in arealist:
             ss = item.split(':')
@@ -621,7 +638,8 @@ class KancolleHistMain ( wx.Frame ):
                 #print ss[1]
                 choise.append(ss[1])
 
-        print choise
+        if self._debuglevel >= 1:
+            print choise
         if len(choise) == 0:
             return
         self.m_comboBoxArea.Clear()
@@ -629,7 +647,10 @@ class KancolleHistMain ( wx.Frame ):
         self.m_comboBoxArea.SetSelection(0)
 
         self.ListCtrlChangeByArea(term, choise[0])
-        event.Skip()
+        self.m_staticSelectStatus.SetLabel("Select by area")
+
+        if event is not None:
+            event.Skip()
 
     def clearClassNameControls(self):
         '''
@@ -671,17 +692,12 @@ class KancolleHistMain ( wx.Frame ):
 
         index = self.m_listCtrl1.GetFirstSelected()
         #print "selected %d in list"%index
-        new_format1 = 0
-        new_format2 = 0
         for item in self.hists:
-            if item[1] == str(2016):
-                if item[2] == "12":
-                    if item[3] == "04":
-                        if item[4] == "16:26:02":
-                            new_format1 = 1
-                            new_format2 = 3
             if item[0] == str(index):
-                #print "item = %s"%item
+                if self._debuglevel > 1:
+                    for aitem in item:
+                        print "%s,"%unicode(aitem, TRANSCODE),
+                    print ""
                 self.clearClassNameControls()
                 location = unicode(item[7], TRANSCODE)
                 if item[7] == "":
@@ -689,38 +705,36 @@ class KancolleHistMain ( wx.Frame ):
                 self.m_staticTextFiledName.SetLabel(unicode(item[5], TRANSCODE))
                 self.m_staticTextMapName.SetLabel(unicode(item[6], TRANSCODE) + ":" + location)
                 self.m_staticTextShouHai.SetLabel(unicode(item[8], TRANSCODE))
-                if item[13 + new_format2] != "":
-                    self.m_staticTextDrop.SetLabel(unicode(item[13 + new_format2] + ':' + item[14 + new_format2], TRANSCODE))
+                if item[16] != "":      # drop艦
+                    self.m_staticTextDrop.SetLabel(unicode(item[16] + ':' + item[17], TRANSCODE))
                 self.m_staticTextKantai.SetLabel(unicode(item[9], TRANSCODE))
-                if new_format2 != 0:
-                    self.m_staticTextShokusetu.SetLabel(unicode(item[12] + ':' + item[13], TRANSCODE))
+                self.m_staticTextShokusetu.SetLabel(unicode(item[13] + ':' + item[14], TRANSCODE))
                 # こちら側
-                #print unicode(item[15 + new_format2], TRANSCODE)
-                self.m_staticTextClass1.SetLabel(unicode(item[15 + new_format2], TRANSCODE))
-                self.m_staticTextName1.SetLabel(unicode(item[16 + new_format2], TRANSCODE))
-                self.m_staticTextClass2.SetLabel(unicode(item[17 + new_format2], TRANSCODE))
-                self.m_staticTextName2.SetLabel(unicode(item[18 + new_format2], TRANSCODE))
-                self.m_staticTextClass3.SetLabel(unicode(item[19 + new_format2], TRANSCODE))
-                self.m_staticTextName3.SetLabel(unicode(item[20 + new_format2], TRANSCODE))
-                self.m_staticTextClass4.SetLabel(unicode(item[21 + new_format2], TRANSCODE))
-                self.m_staticTextName4.SetLabel(unicode(item[22 + new_format2], TRANSCODE))
-                self.m_staticTextClass5.SetLabel(unicode(item[23 + new_format2], TRANSCODE))
-                self.m_staticTextName5.SetLabel(unicode(item[24 + new_format2], TRANSCODE))
-                self.m_staticTextClass6.SetLabel(unicode(item[25 + new_format2], TRANSCODE))
-                self.m_staticTextName6.SetLabel(unicode(item[26 + new_format2], TRANSCODE))
+                self.m_staticTextClass1.SetLabel(unicode(item[18], TRANSCODE))
+                self.m_staticTextName1.SetLabel(unicode(item[19], TRANSCODE))
+                self.m_staticTextClass2.SetLabel(unicode(item[20], TRANSCODE))
+                self.m_staticTextName2.SetLabel(unicode(item[21], TRANSCODE))
+                self.m_staticTextClass3.SetLabel(unicode(item[22], TRANSCODE))
+                self.m_staticTextName3.SetLabel(unicode(item[23], TRANSCODE))
+                self.m_staticTextClass4.SetLabel(unicode(item[24], TRANSCODE))
+                self.m_staticTextName4.SetLabel(unicode(item[25], TRANSCODE))
+                self.m_staticTextClass5.SetLabel(unicode(item[26], TRANSCODE))
+                self.m_staticTextName5.SetLabel(unicode(item[27], TRANSCODE))
+                self.m_staticTextClass6.SetLabel(unicode(item[28], TRANSCODE))
+                self.m_staticTextName6.SetLabel(unicode(item[29], TRANSCODE))
                 # あちら側
-                self.m_staticTextClass11.SetLabel(unicode(item[27 + new_format2], TRANSCODE))
-                self.m_staticTextName11.SetLabel(unicode(item[28 + new_format2], TRANSCODE))
-                self.m_staticTextClass21.SetLabel(unicode(item[29 + new_format2], TRANSCODE))
-                self.m_staticTextName21.SetLabel(unicode(item[30 + new_format2], TRANSCODE))
-                self.m_staticTextClass31.SetLabel(unicode(item[31 + new_format2], TRANSCODE))
-                self.m_staticTextName31.SetLabel(unicode(item[32 + new_format2], TRANSCODE))
-                self.m_staticTextClass41.SetLabel(unicode(item[33 + new_format2], TRANSCODE))
-                self.m_staticTextName41.SetLabel(unicode(item[34 + new_format2], TRANSCODE))
-                self.m_staticTextClass51.SetLabel(unicode(item[35 + new_format2], TRANSCODE))
-                self.m_staticTextName51.SetLabel(unicode(item[36 + new_format2], TRANSCODE))
-                self.m_staticTextClass61.SetLabel(unicode(item[37 + new_format2], TRANSCODE))
-                self.m_staticTextName61.SetLabel(unicode(item[38 + new_format2], TRANSCODE))
+                self.m_staticTextClass11.SetLabel(unicode(item[30], TRANSCODE))
+                self.m_staticTextName11.SetLabel(unicode(item[31], TRANSCODE))
+                self.m_staticTextClass21.SetLabel(unicode(item[32], TRANSCODE))
+                self.m_staticTextName21.SetLabel(unicode(item[33], TRANSCODE))
+                self.m_staticTextClass31.SetLabel(unicode(item[34], TRANSCODE))
+                self.m_staticTextName31.SetLabel(unicode(item[35], TRANSCODE))
+                self.m_staticTextClass41.SetLabel(unicode(item[36], TRANSCODE))
+                self.m_staticTextName41.SetLabel(unicode(item[37], TRANSCODE))
+                self.m_staticTextClass51.SetLabel(unicode(item[38], TRANSCODE))
+                self.m_staticTextName51.SetLabel(unicode(item[39], TRANSCODE))
+                self.m_staticTextClass61.SetLabel(unicode(item[40], TRANSCODE))
+                self.m_staticTextName61.SetLabel(unicode(item[41], TRANSCODE))
 
         event.Skip()
 
@@ -757,6 +771,7 @@ class KancolleHistMain ( wx.Frame ):
         date = self.m_calendar1.GetDate()
         #print type(date)
         self.ListCtrlChangeByDatetime(date.GetYear(), date.GetMonth() + 1, date.GetDay())
+        self.m_staticSelectStatus.SetLabel("Select by calendar")
         event.Skip()
     
     def m_calendar1OnCalendarYear( self, event ):
@@ -777,20 +792,13 @@ class KancolleHistMain ( wx.Frame ):
 
         self.m_listCtrl1.DeleteAllItems()
         index = self.m_listCtrl1.GetItemCount()
-        print shiptype, shipname
-        new_format2 = 0
+        if self._debuglevel >= 1:
+            print shiptype, shipname
         for item in self.hists:
-            if item[1] == str(2016):
-                if item[2] == "12":
-                    if item[3] == "04":
-                        if item[4] == "16:26:02":
-                            new_format1 = 1
-                            new_format2 = 3
-                            print "new_format2 = %d"%new_format2
             item[0] = ''
-            if unicode(item[13 + new_format2], TRANSCODE) == shiptype:
+            if unicode(item[16], TRANSCODE) == shiptype:
                 if shipname != "":
-                    if unicode(item[14 + new_format2], TRANSCODE) != shipname:
+                    if unicode(item[17], TRANSCODE) != shipname:
                         continue
                 #print item[1], item[2], item[3]
                 self.m_listCtrl1.InsertStringItem(index, unicode(str(index), TRANSCODE))
@@ -798,8 +806,8 @@ class KancolleHistMain ( wx.Frame ):
                 self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5], TRANSCODE))
                 self.m_listCtrl1.SetStringItem(index, 3, unicode(item[6], TRANSCODE))
                 self.m_listCtrl1.SetStringItem(index, 4, unicode(item[7], TRANSCODE))
-                if item[13 + new_format2] != "":
-                    self.m_listCtrl1.SetStringItem(index, 5, unicode(item[13 + new_format2] + ':' + item[14 + new_format2], TRANSCODE))
+                if item[16] != "":              # drop
+                    self.m_listCtrl1.SetStringItem(index, 5, unicode(item[16] + ':' + item[17], TRANSCODE))
                 item[0] = str(index)
                 index += 1
 
@@ -810,18 +818,10 @@ class KancolleHistMain ( wx.Frame ):
 
         self.m_listCtrl1.DeleteAllItems()
         index = self.m_listCtrl1.GetItemCount()
-        print event, area
+        if self._debuglevel >= 1:
+            print event, area
         events = event + ":" + area
-        new_format2 = 0
         for item in self.hists:
-            #print item[5], events
-            if item[1] == str(2016):
-                if item[2] == "12":
-                    if item[3] == "04":
-                        if item[4] == "16:26:02":
-                            new_format1 = 1
-                            new_format2 = 3
-                            print "new_format2 = %d"%new_format2
             item[0] = ''
             if unicode(item[5], TRANSCODE) == arealist[events]:
                 #print item[1], item[2], item[3]
@@ -830,8 +830,8 @@ class KancolleHistMain ( wx.Frame ):
                 self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5], TRANSCODE))
                 self.m_listCtrl1.SetStringItem(index, 3, unicode(item[6], TRANSCODE))
                 self.m_listCtrl1.SetStringItem(index, 4, unicode(item[7], TRANSCODE))
-                if item[13 + new_format2] != "":
-                    self.m_listCtrl1.SetStringItem(index, 5, unicode(item[13 + new_format2] + ':' + item[14 + new_format2], TRANSCODE))
+                if item[16] != "":
+                    self.m_listCtrl1.SetStringItem(index, 5, unicode(item[16] + ':' + item[17], TRANSCODE))
                 item[0] = str(index)
                 index += 1
 
@@ -842,16 +842,14 @@ class KancolleHistMain ( wx.Frame ):
 
         self.m_listCtrl1.DeleteAllItems()
         index = self.m_listCtrl1.GetItemCount()
-        print year, month, day
-        new_format2 = 0
+        if self._debuglevel >= 1:
+            print year, month, day
+        length = 0
         for item in self.hists:
-            if item[1] == str(2016):
-                if item[2] == "12":
-                    if item[3] == "04":
-                        if item[4] == "16:26:02":
-                            new_format1 = 1
-                            new_format2 = 3
-                            print "new_format2 = %d"%new_format2
+            if length != len(item):
+                length = len(item)
+                if self._debuglevel >= 1:
+                    print "%s/%s/%s %s - %s"%(item[1], item[2], item[3], item[4], len(item))
             item[0] = ''
             if item[1] == str(year):
                 if item[2] == "%02d"%month:
@@ -862,11 +860,53 @@ class KancolleHistMain ( wx.Frame ):
                         self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5], TRANSCODE))
                         self.m_listCtrl1.SetStringItem(index, 3, unicode(item[6], TRANSCODE))
                         self.m_listCtrl1.SetStringItem(index, 4, unicode(item[7], TRANSCODE))
-                        if item[13 + new_format2] != "":
-                            self.m_listCtrl1.SetStringItem(index, 5, unicode(item[13 + new_format2] + ':' + item[14 + new_format2], TRANSCODE))
+                        if item[16] != "":
+                            self.m_listCtrl1.SetStringItem(index, 5, unicode(item[16] + ':' + item[17], TRANSCODE))
                         item[0] = str(index)
                         index += 1
-    
+    def refreshShipTypeAndName(self):
+        '''
+        艦種設定
+        #shiptypes = (u'戦艦',
+        #             u'工作艦',
+        #             u'揚陸艦',
+        #             u'潜水艦',
+        #             u'軽空母',
+        #             u'駆逐艦',
+        #             u'正規空母',
+        #             u'潜水母艦',
+        #             u'軽巡洋艦',
+        #             u'重巡洋艦')
+        '''
+
+        shiptype = ""
+        shipname = ""
+        self.shiptype_names = []
+        for item in self.hists:
+            if item[16] != "":
+                asnew = True
+                for shipname in self.shiptype_names:
+                    if unicode(item[17], TRANSCODE) == shipname.split(":")[1]:
+                        asnew = False
+                        continue
+
+                if asnew is True:
+                    self.shiptype_names.append("%s:%s"%(unicode(item[16], TRANSCODE), unicode(item[17], TRANSCODE)))
+                    #print("%s:%s"%(unicode(item[16], TRANSCODE), unicode(item[17], TRANSCODE)))
+        shiptypes = []
+        for item in self.shiptype_names:
+            asnew = True
+            for shiptype in shiptypes:
+                if shiptype == item.split(":")[0]:
+                    asnew = False
+                    continue
+
+            if asnew is True:
+                shiptypes.append(item.split(":")[0])
+
+        self.m_comboBoxShiptype.SetItems(shiptypes)
+        self.m_comboBoxShiptype.SetSelection(0)
+        self.m_comboBoxShiptypeOnCombobox()
     def readHistLog(self, filename=""):
         '''
         '''
@@ -885,22 +925,46 @@ class KancolleHistMain ( wx.Frame ):
         #lines = infile.read()
         #lines1 = lines.split('\n')
         self.hists = []
+
         for aline in infile:
             #print "%s : %s"%(count, aline)
             aline = aline.split(',')
+
+            # 日時の分解
             sdate = aline[0].split(' ')
-            date = ['']
+            date = []
+            for i in range(42):
+                date.append("")
+
             if len(sdate[0].split('-')) != 1:
-                date.append(sdate[0].split('-')[0])
-                date.append(sdate[0].split('-')[1])
-                date.append(sdate[0].split('-')[2])
+                #date.append(sdate[0].split('-')[0])
+                #date.append(sdate[0].split('-')[1])
+                #date.append(sdate[0].split('-')[2])
+                date[1] = sdate[0].split('-')[0]
+                date[2] = sdate[0].split('-')[1]
+                date[3] = sdate[0].split('-')[2]
             else:
                 continue
             if len(sdate) == 2:
-                date.append(sdate[1])
-            for i in range(1, len(aline)):
-                #print aline[i]
-                date.append(aline[i])
+                #date.append(sdate[1])
+                date[4] = sdate[1]
+
+            # 各項目の格納
+            linesize = len(aline)
+            for i in range(1, linesize):
+                #date.append(aline[i])
+                item_place = i + 4
+                if linesize == 35:
+                    if i > 7:
+                        item_place += 3
+                try:
+                    date[item_place] = (aline[i])
+                except:
+                    print date
+                    print len(date)
+                    print item_place
+                    sys.exit()
+
             #print date
             self.hists.append(date)
             #self.m_listCtrl1.InsertStringItem(index, aline.split(',')[0])
@@ -914,8 +978,24 @@ class KancolleHistMain ( wx.Frame ):
         #print type(today)
         self.ListCtrlChangeByDatetime(today.year, int(today.month), int(today.day))
 
+        self.refreshShipTypeAndName()
     
 def main():
+# ---- 解析前のログ
+# -- 旧バージョン(35カラム)
+#0    1    2    3    4      5        6        7       8        9         10
+#日付,海域,マス,ボス,ランク,艦隊行動,味方陣形,敵陣形,敵艦隊,ドロップ艦種,ドロップ艦娘
+# 11      12        13      14        15      16        17      18        19      20        21      22    
+#,味方艦1,味方艦1HP,味方艦2,味方艦2HP,味方艦3,味方艦3HP,味方艦4,味方艦4HP,味方艦5,味方艦5HP,味方艦6,味方艦6HP
+# 23    24      25    26      27    28      29    30      31    32      33    34
+# 敵艦1,敵艦1HP,敵艦2,敵艦2HP,敵艦3,敵艦3HP,敵艦4,敵艦4HP,敵艦5,敵艦5HP,敵艦6,敵艦6HP
+#
+# -- 新バージョン(38カラム)
+#0    1    2    3    4      5        6        7      8      9        10     11     12           13             14            15         16 17 18-
+#日付,海域,マス,ボス,ランク,艦隊行動,味方陣形,敵陣形,制空権,味方触接,適触接,敵艦隊,ドロップ艦種,ドロップ艦むす,伊401改(Lv89),24/24,
+
+# ---- 解析後のログ(日付＞2017,1,1,12,15)
+# -- 旧バージョン
 #     5    6    7    8      9        10       11     12     13           14
 #日付,海域,マス,ボス,ランク,艦隊行動,味方陣形,敵陣形,敵艦隊,ドロップ艦種,ドロップ艦娘
 # 15      16        17      18        19      20        21      22        23      24        25      26    
@@ -923,23 +1003,37 @@ def main():
 # 27    28      29    30      31    32      33    34      35    37      38    39
 # 敵艦1,敵艦1HP,敵艦2,敵艦2HP,敵艦3,敵艦3HP,敵艦4,敵艦4HP,敵艦5,敵艦5HP,敵艦6,敵艦6HP
 #
-# 2016/12/04 16:26:02以降
-#     5                6 7    8 9          10     11     12         13 14 15         16 17 18-
-#日付,東部オリョール海,1,出撃,S,Ｔ字戦有利,単縦陣,単縦陣,制空権確保,  ,  ,敵巡洋艦隊,  ,  ,伊401改(Lv89),24/24,
+# -- 新バージョン(2016/12/04 16:26:02以降)
+#     5    6    7    8      9       10        11     12     13       14     15     16           17             18-
+#日付,海域,マス,ボス,ランク,艦隊行動,味方陣形,敵陣形,制空権,味方触接,敵触接,敵艦隊,ドロップ艦種,ドロップ艦むす,伊401改(Lv89),24/24,
     import sys
-    print sys.argv
-    infile = None
-    print len(sys.argv), sys.argv
-    if len(sys.argv) == 2:
-        infile = sys.argv[1]
-        #infile = u"海戦・ドロップ報告書.csv"
-    else:
-        infile = u"海戦・ドロップ報告書.csv"
+    import getopt
+
+    #print len(sys.argv)
+    try:
+        optlist, args = getopt.getopt(sys.argv[1:], "l:d:", ["help"])
+    except getopt.GetoptError, err:
+        print str(err)
+        sys.exit(1)
+
+    debug = 0
+    infile = u"海戦・ドロップ報告書.csv"
+
+    for opt, arg in optlist:
+        if opt == '-d':
+            num = int(arg)
+            if 0 < num and num < 5:
+                debug = num
+        elif opt == '-l':
+            infile = arg
+        else:
+            print "python kancollehist.py [-l <log file>] [-d <debug level>]"
+            sys.exit(1)
 
     app = wx.App(0)
     #KtSystemContFrame(None,-1,'newdoc.xml - HRC System Control Frame')
-    ce = KancolleHistMain(None)
-    ce.readHistLog(infile)
+    ce = KancolleHistMain(None, debug, infile)
+    #ce.readHistLog(infile)
 
     app.MainLoop()
 
