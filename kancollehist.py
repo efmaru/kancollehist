@@ -1,468 +1,30 @@
 # -*- coding: utf-8 -*- 
 
-###########################################################################
-## Python code generated with wxFormBuilder (version Nov 27 2012)
-## http://www.wxformbuilder.org/
-##
-## PLEASE DO "NOT" EDIT THIS FILE!
-###########################################################################
+from kancollehist_gui import *
+import codecs
+import sys
 
-import wx
-import wx.xrc
-try:
-    import wx.calendar
-    cal_object = wx.calendar
-except:
-    import wx.lib.calendar
-    cal_object = wx.lib.calendar
-import sys, os
-import datetime
-from kancolle_deffs import *
+'''
+艦これ、航海日誌ログビューワー
+'''
 
-TRANSCODE='cp932'
-TITLETEXT = u"艦これ 戦闘ログ閲覧 0.9.1"
+if sys.version.split(".")[0] == "3":
+    def unicode(src, transcode):
+        '''
+        '''
 
-###########################################################################
-## Class KancolleHistMain
-###########################################################################
+        return src
 
-class KancolleHistMain ( wx.Frame ):
-    
+class KancolleHist(KancolleHistMain):
+    '''
+    '''
+
     def __init__( self, parent, debuglevel=0, infile=None ):
-        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = TITLETEXT, pos = wx.DefaultPosition, size = wx.Size( 800,600 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
-        
-        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        
-        bSizer94 = wx.BoxSizer( wx.HORIZONTAL )
-        
-        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 500,-1 ), wx.TAB_TRAVERSAL )
-        bSizer95 = wx.BoxSizer( wx.VERTICAL )
-        
-        bSizer4 = wx.BoxSizer( wx.HORIZONTAL )
-        
-        self.m_staticStatus = wx.StaticText( self.m_panel1, wx.ID_ANY, u"全：", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticStatus.Wrap( -1 )
-        bSizer4.Add( self.m_staticStatus, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText58 = wx.StaticText( self.m_panel1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 50,-1 ), 0 )
-        self.m_staticText58.Wrap( -1 )
-        bSizer4.Add( self.m_staticText58, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_buttonReloadLog = wx.Button( self.m_panel1, wx.ID_ANY, u"ログ再読込", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer4.Add( self.m_buttonReloadLog, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        m_comboBoxLogFileChoices = [ u"海戦・ドロップ報告書", u"海戦・ドロップ報告書2015" ]
-        self.m_comboBoxLogFile = wx.ComboBox( self.m_panel1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 250,-1 ), m_comboBoxLogFileChoices, 0 )
-        self.m_comboBoxLogFile.SetSelection( 0 )
-        bSizer4.Add( self.m_comboBoxLogFile, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        
-        bSizer95.Add( bSizer4, 0, wx.EXPAND, 5 )
-        
-        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel1, wx.ID_ANY, u"日付指定" ), wx.HORIZONTAL )
-        
-        bSizer5 = wx.BoxSizer( wx.VERTICAL )
-        
-        self.m_calendar1 = wx.calendar.CalendarCtrl( self.m_panel1, wx.ID_ANY, wx.DefaultDateTime, wx.DefaultPosition, wx.DefaultSize, wx.calendar.CAL_SHOW_HOLIDAYS )
-        bSizer5.Add( self.m_calendar1, 0, wx.ALL, 5 )
-        
-        fgSizer5 = wx.FlexGridSizer( 6, 2, 0, 0 )
-        fgSizer5.SetFlexibleDirection( wx.BOTH )
-        fgSizer5.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        
-        self.m_checkBox2 = wx.CheckBox( self.m_panel1, wx.ID_ANY, u"1-5", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer5.Add( self.m_checkBox2, 0, wx.RIGHT|wx.LEFT, 5 )
-        
-        self.m_checkBox3 = wx.CheckBox( self.m_panel1, wx.ID_ANY, u"4-5", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer5.Add( self.m_checkBox3, 0, wx.RIGHT|wx.LEFT, 5 )
-        
-        self.m_checkBox4 = wx.CheckBox( self.m_panel1, wx.ID_ANY, u"1-6", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer5.Add( self.m_checkBox4, 0, wx.RIGHT|wx.LEFT, 5 )
-        
-        self.m_checkBox5 = wx.CheckBox( self.m_panel1, wx.ID_ANY, u"5-5", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer5.Add( self.m_checkBox5, 0, wx.RIGHT|wx.LEFT, 5 )
-        
-        self.m_checkBox6 = wx.CheckBox( self.m_panel1, wx.ID_ANY, u"2-5", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer5.Add( self.m_checkBox6, 0, wx.RIGHT|wx.LEFT, 5 )
-        
-        self.m_checkBox7 = wx.CheckBox( self.m_panel1, wx.ID_ANY, u"6-5", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer5.Add( self.m_checkBox7, 0, wx.RIGHT|wx.LEFT, 5 )
-        
-        self.m_checkBox8 = wx.CheckBox( self.m_panel1, wx.ID_ANY, u"3-5", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer5.Add( self.m_checkBox8, 0, wx.RIGHT|wx.LEFT, 5 )
-        
-        self.m_buttonBattleResultCalc = wx.Button( self.m_panel1, wx.ID_ANY, u"戦果計算（選択月）", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer5.Add( self.m_buttonBattleResultCalc, 0, wx.RIGHT|wx.LEFT, 5 )
-        
-        
-        bSizer5.Add( fgSizer5, 1, wx.EXPAND, 5 )
-        
-        
-        sbSizer4.Add( bSizer5, 1, wx.EXPAND, 5 )
-        
-        bSizer8 = wx.BoxSizer( wx.VERTICAL )
-        
-        self.m_staticText49 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"海域選択", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText49.Wrap( -1 )
-        bSizer8.Add( self.m_staticText49, 0, wx.TOP|wx.RIGHT|wx.LEFT, 5 )
-        
-        m_comboBoxAreaChoices = []
-        self.m_comboBoxArea = wx.ComboBox( self.m_panel1, wx.ID_ANY, u"Combo!", wx.DefaultPosition, wx.DefaultSize, m_comboBoxAreaChoices, 0 )
-        bSizer8.Add( self.m_comboBoxArea, 0, wx.BOTTOM|wx.RIGHT|wx.LEFT, 5 )
-        
-        self.m_staticText50 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"イベント選択", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText50.Wrap( -1 )
-        bSizer8.Add( self.m_staticText50, 0, wx.TOP|wx.RIGHT|wx.LEFT, 5 )
-        
-        m_comboBoxEventChoices = []
-        self.m_comboBoxEvent = wx.ComboBox( self.m_panel1, wx.ID_ANY, u"Combo!", wx.DefaultPosition, wx.DefaultSize, m_comboBoxEventChoices, 0 )
-        bSizer8.Add( self.m_comboBoxEvent, 0, wx.BOTTOM|wx.RIGHT|wx.LEFT, 5 )
-        
-        sbSizer6 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel1, wx.ID_ANY, u"ドロップ艦むす検索" ), wx.VERTICAL )
-        
-        self.m_staticText54 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"艦種", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText54.Wrap( -1 )
-        sbSizer6.Add( self.m_staticText54, 0, wx.RIGHT, 5 )
-        
-        m_comboBoxShiptypeChoices = []
-        self.m_comboBoxShiptype = wx.ComboBox( self.m_panel1, wx.ID_ANY, u"Combo!", wx.DefaultPosition, wx.DefaultSize, m_comboBoxShiptypeChoices, 0 )
-        sbSizer6.Add( self.m_comboBoxShiptype, 0, wx.BOTTOM|wx.RIGHT, 5 )
-        
-        self.m_staticText55 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"艦名", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText55.Wrap( -1 )
-        sbSizer6.Add( self.m_staticText55, 0, wx.TOP|wx.RIGHT, 5 )
-        
-        m_comboBoxShipnameChoices = []
-        self.m_comboBoxShipname = wx.ComboBox( self.m_panel1, wx.ID_ANY, u"Combo!", wx.DefaultPosition, wx.DefaultSize, m_comboBoxShipnameChoices, 0 )
-        sbSizer6.Add( self.m_comboBoxShipname, 0, wx.RIGHT, 5 )
-        
-        self.m_buttonGoTypeNameSeach = wx.Button( self.m_panel1, wx.ID_ANY, u"検索...", wx.DefaultPosition, wx.DefaultSize, 0 )
-        sbSizer6.Add( self.m_buttonGoTypeNameSeach, 0, wx.TOP|wx.RIGHT|wx.LEFT, 5 )
-        
-        
-        bSizer8.Add( sbSizer6, 1, wx.EXPAND, 5 )
-        
-        
-        sbSizer4.Add( bSizer8, 1, wx.EXPAND, 5 )
-        
-        
-        bSizer95.Add( sbSizer4, 0, wx.EXPAND, 5 )
-        
-        sbSizer5 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel1, wx.ID_ANY, u"履歴" ), wx.VERTICAL )
-        
-        self.m_listCtrl1 = wx.ListCtrl( self.m_panel1, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,150 ), wx.LC_ALIGN_LEFT|wx.LC_HRULES|wx.LC_REPORT|wx.LC_VRULES )
-        sbSizer5.Add( self.m_listCtrl1, 1, wx.EXPAND, 5 )
-        
-        bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
-        
-        self.m_staticText61 = wx.StaticText( self.m_panel1, wx.ID_ANY, u"List select by :", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText61.Wrap( -1 )
-        bSizer6.Add( self.m_staticText61, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-        
-        self.m_staticSelectStatus = wx.StaticText( self.m_panel1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticSelectStatus.Wrap( -1 )
-        bSizer6.Add( self.m_staticSelectStatus, 0, wx.ALL, 5 )
-        
-        
-        sbSizer5.Add( bSizer6, 0, 0, 5 )
-        
-        
-        bSizer95.Add( sbSizer5, 1, wx.EXPAND, 5 )
-        
-        
-        self.m_panel1.SetSizer( bSizer95 )
-        self.m_panel1.Layout()
-        bSizer94.Add( self.m_panel1, 1, wx.EXPAND |wx.ALL, 5 )
-        
-        self.m_splitter1 = wx.SplitterWindow( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SP_3D )
-        self.m_splitter1.Bind( wx.EVT_IDLE, self.m_splitter1OnIdle )
-        
-        self.m_panel7 = wx.Panel( self.m_splitter1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        fgSizer3 = wx.FlexGridSizer( 3, 1, 0, 0 )
-        fgSizer3.SetFlexibleDirection( wx.BOTH )
-        fgSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        
-        sbSizer44 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel7, wx.ID_ANY, u"戦績他情報" ), wx.VERTICAL )
-        
-        fgSizer23 = wx.FlexGridSizer( 7, 2, 0, 0 )
-        fgSizer23.SetFlexibleDirection( wx.BOTH )
-        fgSizer23.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        
-        self.m_staticText7 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"エリア名", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText7.Wrap( -1 )
-        fgSizer23.Add( self.m_staticText7, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.BOTTOM|wx.RIGHT, 5 )
-        
-        self.m_staticTextFiledName = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 200,-1 ), 0 )
-        self.m_staticTextFiledName.Wrap( -1 )
-        fgSizer23.Add( self.m_staticTextFiledName, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
-        
-        self.m_staticText9 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"マップ名", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText9.Wrap( -1 )
-        fgSizer23.Add( self.m_staticText9, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL, 5 )
-        
-        self.m_staticTextMapName = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 200,-1 ), 0 )
-        self.m_staticTextMapName.Wrap( -1 )
-        fgSizer23.Add( self.m_staticTextMapName, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
-        
-        self.m_staticText56 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"艦隊行動", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText56.Wrap( -1 )
-        fgSizer23.Add( self.m_staticText56, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextKantai = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 200,-1 ), 0 )
-        self.m_staticTextKantai.Wrap( -1 )
-        fgSizer23.Add( self.m_staticTextKantai, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText410 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"勝敗", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText410.Wrap( -1 )
-        fgSizer23.Add( self.m_staticText410, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.TOP|wx.BOTTOM|wx.RIGHT, 5 )
-        
-        self.m_staticTextShouHai = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 200,-1 ), 0 )
-        self.m_staticTextShouHai.Wrap( -1 )
-        fgSizer23.Add( self.m_staticTextShouHai, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
-        
-        self.m_staticText60 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"触接", wx.DefaultPosition, wx.Size( -1,-1 ), 0 )
-        self.m_staticText60.Wrap( -1 )
-        fgSizer23.Add( self.m_staticText60, 0, wx.ALL|wx.ALIGN_RIGHT, 5 )
-        
-        self.m_staticTextShokusetu = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 200,-1 ), 0 )
-        self.m_staticTextShokusetu.Wrap( -1 )
-        fgSizer23.Add( self.m_staticTextShokusetu, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
-        
-        self.m_staticText52 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"ドロップ", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText52.Wrap( -1 )
-        fgSizer23.Add( self.m_staticText52, 0, wx.TOP|wx.BOTTOM|wx.RIGHT, 5 )
-        
-        self.m_staticTextDrop = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextDrop.Wrap( -1 )
-        fgSizer23.Add( self.m_staticTextDrop, 0, wx.LEFT|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        
-        sbSizer44.Add( fgSizer23, 1, wx.EXPAND, 5 )
-        
-        
-        fgSizer3.Add( sbSizer44, 1, wx.EXPAND, 5 )
-        
-        sbSizer42 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel7, wx.ID_ANY, u"こちら側" ), wx.VERTICAL )
-        
-        fgSizer2 = wx.FlexGridSizer( 7, 3, 0, 0 )
-        fgSizer2.SetFlexibleDirection( wx.BOTH )
-        fgSizer2.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        
-        self.m_staticText30 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText30.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText30, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText31 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"艦名", wx.DefaultPosition, wx.Size( 100,-1 ), wx.ALIGN_CENTRE )
-        self.m_staticText31.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText31, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText32 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"HP", wx.DefaultPosition, wx.Size( 150,-1 ), wx.ALIGN_CENTRE )
-        self.m_staticText32.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText32, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
-        
-        self.m_staticText11 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"旗艦 ", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText11.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText11, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
-        
-        self.m_staticTextClass1 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass1.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextClass1, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName1 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName1.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextName1, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText14 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"2", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText14.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText14, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextClass2 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass2.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextClass2, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName2 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName2.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextName2, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText17 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"3", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText17.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText17, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextClass3 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass3.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextClass3, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName3 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName3.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextName3, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText20 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"4", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText20.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText20, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextClass4 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass4.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextClass4, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName4 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName4.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextName4, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText23 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"5", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText23.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText23, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextClass5 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass5.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextClass5, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName5 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName5.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextName5, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText26 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"6", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText26.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText26, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextClass6 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass6.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextClass6, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName6 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName6.Wrap( -1 )
-        fgSizer2.Add( self.m_staticTextName6, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        
-        sbSizer42.Add( fgSizer2, 1, wx.EXPAND, 5 )
-        
-        
-        fgSizer3.Add( sbSizer42, 1, wx.EXPAND, 5 )
-        
-        sbSizer43 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel7, wx.ID_ANY, u"あちら側" ), wx.VERTICAL )
-        
-        fgSizer21 = wx.FlexGridSizer( 7, 3, 0, 0 )
-        fgSizer21.SetFlexibleDirection( wx.BOTH )
-        fgSizer21.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        
-        self.m_staticText301 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText301.Wrap( -1 )
-        fgSizer21.Add( self.m_staticText301, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText311 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"艦名", wx.DefaultPosition, wx.Size( 100,-1 ), wx.ALIGN_CENTRE )
-        self.m_staticText311.Wrap( -1 )
-        fgSizer21.Add( self.m_staticText311, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText321 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"HP", wx.DefaultPosition, wx.Size( 150,-1 ), wx.ALIGN_CENTRE )
-        self.m_staticText321.Wrap( -1 )
-        fgSizer21.Add( self.m_staticText321, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
-        
-        self.m_staticText111 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"旗艦 ", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText111.Wrap( -1 )
-        fgSizer21.Add( self.m_staticText111, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
-        
-        self.m_staticTextClass11 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass11.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextClass11, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName11 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName11.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextName11, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText141 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"2", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText141.Wrap( -1 )
-        fgSizer21.Add( self.m_staticText141, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextClass21 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass21.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextClass21, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName21 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName21.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextName21, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText171 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"3", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText171.Wrap( -1 )
-        fgSizer21.Add( self.m_staticText171, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextClass31 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass31.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextClass31, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName31 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName31.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextName31, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText201 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"4", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText201.Wrap( -1 )
-        fgSizer21.Add( self.m_staticText201, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextClass41 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass41.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextClass41, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName41 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName41.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextName41, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText231 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"5", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText231.Wrap( -1 )
-        fgSizer21.Add( self.m_staticText231, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextClass51 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass51.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextClass51, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName51 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName51.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextName51, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticText261 = wx.StaticText( self.m_panel7, wx.ID_ANY, u"6", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText261.Wrap( -1 )
-        fgSizer21.Add( self.m_staticText261, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextClass61 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextClass61.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextClass61, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        self.m_staticTextName61 = wx.StaticText( self.m_panel7, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticTextName61.Wrap( -1 )
-        fgSizer21.Add( self.m_staticTextName61, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL, 5 )
-        
-        
-        sbSizer43.Add( fgSizer21, 1, wx.EXPAND, 5 )
-        
-        
-        fgSizer3.Add( sbSizer43, 1, wx.EXPAND, 5 )
-        
-        
-        self.m_panel7.SetSizer( fgSizer3 )
-        self.m_panel7.Layout()
-        fgSizer3.Fit( self.m_panel7 )
-        self.m_splitter1.Initialize( self.m_panel7 )
-        bSizer94.Add( self.m_splitter1, 0, wx.EXPAND, 5 )
-        
-        
-        self.SetSizer( bSizer94 )
-        self.Layout()
-        
-        self.Centre( wx.BOTH )
-        self.Show()
+        '''
+        コンストラクタ
+        '''
 
-        # Connect Events
-        self.m_buttonReloadLog.Bind( wx.EVT_BUTTON, self.m_buttonReloadLogOnButtonClick )
-        self.m_calendar1.Bind( wx.calendar.EVT_CALENDAR, self.m_calendar1OnCalendar )
-        self.m_calendar1.Bind( wx.calendar.EVT_CALENDAR_DAY, self.m_calendar1OnCalendarDay )
-        self.m_calendar1.Bind( wx.calendar.EVT_CALENDAR_MONTH, self.m_calendar1OnCalendarMonth )
-        self.m_calendar1.Bind( wx.calendar.EVT_CALENDAR_SEL_CHANGED, self.m_calendar1OnCalendarSelChanged )
-        self.m_calendar1.Bind( wx.calendar.EVT_CALENDAR_YEAR, self.m_calendar1OnCalendarYear )
-        self.m_comboBoxArea.Bind( wx.EVT_COMBOBOX, self.m_comboBoxAreaOnCombobox )
-        self.m_comboBoxEvent.Bind( wx.EVT_COMBOBOX, self.m_comboBoxEventOnCombobox )
-        self.m_comboBoxShiptype.Bind( wx.EVT_COMBOBOX, self.m_comboBoxShiptypeOnCombobox )
-        self.m_comboBoxShipname.Bind( wx.EVT_COMBOBOX, self.m_comboBoxShipnameOnCombobox )
-        self.m_buttonGoTypeNameSeach.Bind( wx.EVT_BUTTON, self.m_buttonGoTypeNameSeachOnButtonClick )
-        self.m_buttonBattleResultCalc.Bind( wx.EVT_BUTTON, self.m_buttonBattleResultCalcOnButtonClick )
-        self.m_listCtrl1.Bind( wx.EVT_LIST_ITEM_SELECTED, self.m_listCtrl1OnListItemSelected )
-        self.Bind( wx.EVT_CLOSE, self.KancolleHistMainOnClose )
+        KancolleHistMain.__init__(self, parent)
 
         self._debuglevel = debuglevel
         self.logfilename = ""
@@ -521,7 +83,7 @@ class KancolleHistMain ( wx.Frame ):
         '''
         '''
 
-        print "exit program"
+        print("exit program")
         self.m_listCtrl1.DeleteAllItems()
         pass
 
@@ -531,7 +93,7 @@ class KancolleHistMain ( wx.Frame ):
 
         ret = ending.ShowModal()
         if self._debuglevel >= 1:
-            print ret
+            print(ret)
         if ret == wx.ID_NO:
             return
         event.Skip()
@@ -547,7 +109,7 @@ class KancolleHistMain ( wx.Frame ):
         year = "%s"%date.GetYear()
         month = "%d"%(date.GetMonth() + 1)
         if self._debuglevel >= 1:
-            print "%s年%s月のおおよその戦果"%(year, month)
+            print("%s年%s月のおおよその戦果"%(year, month))
         for item in self.hists:
             if item[1] == date.GetYear():
                 if item[2] == date.GetMonth():
@@ -570,7 +132,7 @@ class KancolleHistMain ( wx.Frame ):
         '''
 
         shiptype = self.m_comboBoxShiptype.GetValue()
-        print shiptype
+        print(shiptype)
         shipnames = []
         for item in self.shiptype_names:
             #print item
@@ -617,7 +179,7 @@ class KancolleHistMain ( wx.Frame ):
 
         area = self.m_comboBoxArea.GetValue()
         if self._debuglevel >= 1:
-            print area
+            print(area)
         term = self.m_comboBoxEvent.GetValue()
         self.ListCtrlChangeByArea(term, area)
         event.Skip()
@@ -629,7 +191,7 @@ class KancolleHistMain ( wx.Frame ):
 
         term = self.m_comboBoxEvent.GetValue()
         if self._debuglevel >= 1:
-            print term
+            print(term)
         choise = []
         for item in arealist:
             ss = item.split(':')
@@ -639,7 +201,7 @@ class KancolleHistMain ( wx.Frame ):
                 choise.append(ss[1])
 
         if self._debuglevel >= 1:
-            print choise
+            print(choise)
         if len(choise) == 0:
             return
         self.m_comboBoxArea.Clear()
@@ -696,13 +258,16 @@ class KancolleHistMain ( wx.Frame ):
             if item[0] == str(index):
                 if self._debuglevel > 1:
                     for aitem in item:
-                        print "%s,"%unicode(aitem, TRANSCODE),
-                    print ""
+                        print("%s,"%unicode(aitem, TRANSCODE),)
+                    print("")
                 self.clearClassNameControls()
                 location = unicode(item[7], TRANSCODE)
                 if item[7] == "":
                     location = chr(64 + int(item[6]))
-                self.m_staticTextFiledName.SetLabel(unicode(item[5], TRANSCODE))
+                if len(item[5].split(":")) == 2:
+                    self.m_staticTextFiledName.SetLabel(unicode(item[5].split(":")[1], TRANSCODE))
+                else:
+                    self.m_staticTextFiledName.SetLabel(unicode(item[5], TRANSCODE))
                 self.m_staticTextMapName.SetLabel(unicode(item[6], TRANSCODE) + ":" + location)
                 self.m_staticTextShouHai.SetLabel(unicode(item[8], TRANSCODE))
                 if item[16] != "":      # drop艦
@@ -710,31 +275,58 @@ class KancolleHistMain ( wx.Frame ):
                 self.m_staticTextKantai.SetLabel(unicode(item[9], TRANSCODE))
                 self.m_staticTextShokusetu.SetLabel(unicode(item[13] + ':' + item[14], TRANSCODE))
                 # こちら側
+                # 第一艦隊
+                self.m_staticTextFFShape.SetLabel(unicode(item[10], TRANSCODE))
                 self.m_staticTextClass1.SetLabel(unicode(item[18], TRANSCODE))
-                self.m_staticTextName1.SetLabel(unicode(item[19], TRANSCODE))
+                #self.m_staticTextName1.SetLabel(unicode(item[19], TRANSCODE))
                 self.m_staticTextClass2.SetLabel(unicode(item[20], TRANSCODE))
-                self.m_staticTextName2.SetLabel(unicode(item[21], TRANSCODE))
+                #self.m_staticTextName2.SetLabel(unicode(item[21], TRANSCODE))
                 self.m_staticTextClass3.SetLabel(unicode(item[22], TRANSCODE))
-                self.m_staticTextName3.SetLabel(unicode(item[23], TRANSCODE))
+                #self.m_staticTextName3.SetLabel(unicode(item[23], TRANSCODE))
                 self.m_staticTextClass4.SetLabel(unicode(item[24], TRANSCODE))
-                self.m_staticTextName4.SetLabel(unicode(item[25], TRANSCODE))
+                #self.m_staticTextName4.SetLabel(unicode(item[25], TRANSCODE))
                 self.m_staticTextClass5.SetLabel(unicode(item[26], TRANSCODE))
-                self.m_staticTextName5.SetLabel(unicode(item[27], TRANSCODE))
+                #self.m_staticTextName5.SetLabel(unicode(item[27], TRANSCODE))
                 self.m_staticTextClass6.SetLabel(unicode(item[28], TRANSCODE))
-                self.m_staticTextName6.SetLabel(unicode(item[29], TRANSCODE))
+                #self.m_staticTextName6.SetLabel(unicode(item[29], TRANSCODE))
+                # 第二艦隊
+                if item[42] != "":
+                    self.m_staticTextName1.SetLabel(unicode(item[30], TRANSCODE))
+                    self.m_staticTextName2.SetLabel(unicode(item[32], TRANSCODE))
+                    self.m_staticTextName3.SetLabel(unicode(item[34], TRANSCODE))
+                    self.m_staticTextName4.SetLabel(unicode(item[36], TRANSCODE))
+                    self.m_staticTextName5.SetLabel(unicode(item[38], TRANSCODE))
+                    self.m_staticTextName6.SetLabel(unicode(item[40], TRANSCODE))
                 # あちら側
-                self.m_staticTextClass11.SetLabel(unicode(item[30], TRANSCODE))
-                self.m_staticTextName11.SetLabel(unicode(item[31], TRANSCODE))
-                self.m_staticTextClass21.SetLabel(unicode(item[32], TRANSCODE))
-                self.m_staticTextName21.SetLabel(unicode(item[33], TRANSCODE))
-                self.m_staticTextClass31.SetLabel(unicode(item[34], TRANSCODE))
-                self.m_staticTextName31.SetLabel(unicode(item[35], TRANSCODE))
-                self.m_staticTextClass41.SetLabel(unicode(item[36], TRANSCODE))
-                self.m_staticTextName41.SetLabel(unicode(item[37], TRANSCODE))
-                self.m_staticTextClass51.SetLabel(unicode(item[38], TRANSCODE))
-                self.m_staticTextName51.SetLabel(unicode(item[39], TRANSCODE))
-                self.m_staticTextClass61.SetLabel(unicode(item[40], TRANSCODE))
-                self.m_staticTextName61.SetLabel(unicode(item[41], TRANSCODE))
+                # 第一艦隊
+                if item[42] == "":
+                    self.m_staticTextClass11.SetLabel(unicode(item[30], TRANSCODE))
+                    self.m_staticTextClass21.SetLabel(unicode(item[32], TRANSCODE))
+                    self.m_staticTextClass31.SetLabel(unicode(item[34], TRANSCODE))
+                    self.m_staticTextClass41.SetLabel(unicode(item[36], TRANSCODE))
+                    self.m_staticTextClass51.SetLabel(unicode(item[38], TRANSCODE))
+                    self.m_staticTextClass61.SetLabel(unicode(item[40], TRANSCODE))
+                else:
+                    self.m_staticTextEFShape.SetLabel(unicode(item[11], TRANSCODE))
+                    self.m_staticTextClass11.SetLabel(unicode(item[42], TRANSCODE))
+                    #self.m_staticTextName11.SetLabel(unicode(item[43], TRANSCODE))
+                    self.m_staticTextClass21.SetLabel(unicode(item[44], TRANSCODE))
+                    #self.m_staticTextName21.SetLabel(unicode(item[45], TRANSCODE))
+                    self.m_staticTextClass31.SetLabel(unicode(item[46], TRANSCODE))
+                    #self.m_staticTextName31.SetLabel(unicode(item[47], TRANSCODE))
+                    self.m_staticTextClass41.SetLabel(unicode(item[48], TRANSCODE))
+                    #self.m_staticTextName41.SetLabel(unicode(item[49], TRANSCODE))
+                    self.m_staticTextClass51.SetLabel(unicode(item[50], TRANSCODE))
+                    #self.m_staticTextName51.SetLabel(unicode(item[51], TRANSCODE))
+                    self.m_staticTextClass61.SetLabel(unicode(item[52], TRANSCODE))
+                    #self.m_staticTextName61.SetLabel(unicode(item[53], TRANSCODE))
+                # 第二艦隊
+                self.m_staticTextName11.SetLabel(unicode(item[54], TRANSCODE))
+                self.m_staticTextName21.SetLabel(unicode(item[56], TRANSCODE))
+                self.m_staticTextName31.SetLabel(unicode(item[58], TRANSCODE))
+                self.m_staticTextName41.SetLabel(unicode(item[60], TRANSCODE))
+                self.m_staticTextName51.SetLabel(unicode(item[62], TRANSCODE))
+                self.m_staticTextName61.SetLabel(unicode(item[64], TRANSCODE))
 
         event.Skip()
 
@@ -793,7 +385,7 @@ class KancolleHistMain ( wx.Frame ):
         self.m_listCtrl1.DeleteAllItems()
         index = self.m_listCtrl1.GetItemCount()
         if self._debuglevel >= 1:
-            print shiptype, shipname
+            print(shiptype, shipname)
         for item in self.hists:
             item[0] = ''
             if unicode(item[16], TRANSCODE) == shiptype:
@@ -802,8 +394,11 @@ class KancolleHistMain ( wx.Frame ):
                         continue
                 #print item[1], item[2], item[3]
                 self.m_listCtrl1.InsertStringItem(index, unicode(str(index), TRANSCODE))
-                self.m_listCtrl1.SetStringItem(index, 1, item[1] + ':' + item[2] + ':' + item[3] + ' ' + item[4])
-                self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5], TRANSCODE))
+                self.m_listCtrl1.SetStringItem(index, 1, item[1] + '/' + item[2] + '/' + item[3] + ' ' + item[4])
+                if len(item[5].split(":")) == 2:
+                    self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5].split(":")[1], TRANSCODE))
+                else:
+                    self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5], TRANSCODE))
                 self.m_listCtrl1.SetStringItem(index, 3, unicode(item[6], TRANSCODE))
                 self.m_listCtrl1.SetStringItem(index, 4, unicode(item[7], TRANSCODE))
                 if item[16] != "":              # drop
@@ -819,19 +414,45 @@ class KancolleHistMain ( wx.Frame ):
         self.m_listCtrl1.DeleteAllItems()
         index = self.m_listCtrl1.GetItemCount()
         if self._debuglevel >= 1:
-            print event, area
+            print(event, area)
         events = event + ":" + area
         for item in self.hists:
             item[0] = ''
-            if unicode(item[5], TRANSCODE) == arealist[events]:
+            area_num = area_name = ""
+            items = item[5].split(":")
+            if len(items) == 2:
+                area_num = items[0]
+                area_name = items[1]
+            else:
+                area_name = item[5]
+            #if unicode(item[5], TRANSCODE) == arealist[events]:
+            findarea = False
+            if area_num == "":
+                if unicode(area_name, TRANSCODE) == arealist[events]:
+                    findarea = True
+            else:
+                if area_num == area:
+                    findarea = True
+            if findarea is True:
                 #print item[1], item[2], item[3]
-                self.m_listCtrl1.InsertStringItem(index, unicode(str(index), TRANSCODE))
-                self.m_listCtrl1.SetStringItem(index, 1, item[1] + ':' + item[2] + ':' + item[3] + ' ' + item[4])
-                self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5], TRANSCODE))
-                self.m_listCtrl1.SetStringItem(index, 3, unicode(item[6], TRANSCODE))
-                self.m_listCtrl1.SetStringItem(index, 4, unicode(item[7], TRANSCODE))
+                #print("arealist[events] = %s[%s](%s)"%(arealist[events], area, item[5]))
+                #self.m_listCtrl1.InsertStringItem(index, unicode(str(index), TRANSCODE))
+                self.m_listCtrl1.InsertItem(index, unicode(str(index), TRANSCODE))
+                #self.m_listCtrl1.SetStringItem(index, 1, item[1] + '/' + item[2] + '/' + item[3] + ' ' + item[4])
+                self.m_listCtrl1.SetItem(index, 1, item[1] + '/' + item[2] + '/' + item[3] + ' ' + item[4])
+                if len(item[5].split(":")) == 2:
+                    #self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5].split(":")[1], TRANSCODE))
+                    self.m_listCtrl1.SetItem(index, 2, unicode(item[5].split(":")[1], TRANSCODE))
+                else:
+                    #self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5], TRANSCODE))
+                    self.m_listCtrl1.SetItem(index, 2, unicode(item[5], TRANSCODE))
+                #self.m_listCtrl1.SetStringItem(index, 3, unicode(item[6], TRANSCODE))
+                #self.m_listCtrl1.SetStringItem(index, 4, unicode(item[7], TRANSCODE))
+                self.m_listCtrl1.SetItem(index, 3, unicode(item[6], TRANSCODE))
+                self.m_listCtrl1.SetItem(index, 4, unicode(item[7], TRANSCODE))
                 if item[16] != "":
-                    self.m_listCtrl1.SetStringItem(index, 5, unicode(item[16] + ':' + item[17], TRANSCODE))
+                    #self.m_listCtrl1.SetStringItem(index, 5, unicode(item[16] + ':' + item[17], TRANSCODE))
+                    self.m_listCtrl1.SetItem(index, 5, unicode(item[16] + ':' + item[17], TRANSCODE))
                 item[0] = str(index)
                 index += 1
 
@@ -843,25 +464,35 @@ class KancolleHistMain ( wx.Frame ):
         self.m_listCtrl1.DeleteAllItems()
         index = self.m_listCtrl1.GetItemCount()
         if self._debuglevel >= 1:
-            print year, month, day
+            print(year, month, day)
         length = 0
         for item in self.hists:
             if length != len(item):
                 length = len(item)
                 if self._debuglevel >= 1:
-                    print "%s/%s/%s %s - %s"%(item[1], item[2], item[3], item[4], len(item))
+                    print("%s/%s/%s %s - %s"%(item[1], item[2], item[3], item[4], len(item)))
             item[0] = ''
             if item[1] == str(year):
                 if item[2] == "%02d"%month:
                     if item[3] == "%02d"%day:
                         #print item[1], item[2], item[3]
-                        self.m_listCtrl1.InsertStringItem(index, unicode(str(index), TRANSCODE))
-                        self.m_listCtrl1.SetStringItem(index, 1, item[1] + ':' + item[2] + ':' + item[3] + ' ' + item[4])
-                        self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5], TRANSCODE))
-                        self.m_listCtrl1.SetStringItem(index, 3, unicode(item[6], TRANSCODE))
-                        self.m_listCtrl1.SetStringItem(index, 4, unicode(item[7], TRANSCODE))
+                        #self.m_listCtrl1.InsertStringItem(index, unicode(str(index), TRANSCODE))
+                        self.m_listCtrl1.InsertItem(index, unicode(str(index), TRANSCODE))
+                        #self.m_listCtrl1.SetStringItem(index, 1, item[1] + ':' + item[2] + ':' + item[3] + ' ' + item[4])
+                        self.m_listCtrl1.SetItem(index, 1, item[1] + ':' + item[2] + ':' + item[3] + ' ' + item[4])
+                        if len(item[5].split(":")) == 2:
+                            #self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5].split(":")[1], TRANSCODE))
+                            self.m_listCtrl1.SetItem(index, 2, unicode(item[5].split(":")[1], TRANSCODE))
+                        else:
+                            #self.m_listCtrl1.SetStringItem(index, 2, unicode(item[5], TRANSCODE))
+                            self.m_listCtrl1.SetItem(index, 2, unicode(item[5], TRANSCODE))
+                        #self.m_listCtrl1.SetStringItem(index, 3, unicode(item[6], TRANSCODE))
+                        #self.m_listCtrl1.SetStringItem(index, 4, unicode(item[7], TRANSCODE))
+                        self.m_listCtrl1.SetItem(index, 3, unicode(item[6], TRANSCODE))
+                        self.m_listCtrl1.SetItem(index, 4, unicode(item[7], TRANSCODE))
                         if item[16] != "":
-                            self.m_listCtrl1.SetStringItem(index, 5, unicode(item[16] + ':' + item[17], TRANSCODE))
+                            #self.m_listCtrl1.SetStringItem(index, 5, unicode(item[16] + ':' + item[17], TRANSCODE))
+                            self.m_listCtrl1.SetItem(index, 5, unicode(item[16] + ':' + item[17], TRANSCODE))
                         item[0] = str(index)
                         index += 1
     def refreshShipTypeAndName(self):
@@ -913,7 +544,7 @@ class KancolleHistMain ( wx.Frame ):
 
         if filename == "":
             if self.logfilename == "":
-                print "set log filename...exit"
+                print("set log filename...exit")
                 sys.exit(1)
             else:
                 filename = self.logfilename
@@ -921,19 +552,20 @@ class KancolleHistMain ( wx.Frame ):
             if self.logfilename == "":
                 self.logfilename = filename
 
-        infile = open(filename, 'r')
+        infile = codecs.open(filename, 'r', 'sjis')
         #lines = infile.read()
         #lines1 = lines.split('\n')
         self.hists = []
 
         for aline in infile:
             #print "%s : %s"%(count, aline)
+            aline = aline.replace('"', '')
             aline = aline.split(',')
 
             # 日時の分解
             sdate = aline[0].split(' ')
             date = []
-            for i in range(42):
+            for i in range(70):
                 date.append("")
 
             if len(sdate[0].split('-')) != 1:
@@ -944,6 +576,7 @@ class KancolleHistMain ( wx.Frame ):
                 date[2] = sdate[0].split('-')[1]
                 date[3] = sdate[0].split('-')[2]
             else:
+                print(sdate[0])
                 continue
             if len(sdate) == 2:
                 #date.append(sdate[1])
@@ -953,6 +586,11 @@ class KancolleHistMain ( wx.Frame ):
             linesize = len(aline)
             for i in range(1, linesize):
                 #date.append(aline[i])
+                if i == 1:
+                    area_num_and_name = aline[i].split(" ")
+                    if len(area_num_and_name) == 2:
+                        date[i + 4] = "%s:%s"%(area_num_and_name[0], area_num_and_name[1])
+                        continue
                 item_place = i + 4
                 if linesize == 35:
                     if i > 7:
@@ -960,13 +598,15 @@ class KancolleHistMain ( wx.Frame ):
                 try:
                     date[item_place] = (aline[i])
                 except:
-                    print date
-                    print len(date)
-                    print item_place
+                    print(date)
+                    print(len(date))
+                    print(item_place)
                     sys.exit()
 
             #print date
             self.hists.append(date)
+            #sys.stderr.write("%s\n"%str(date))
+            #sys.stderr.flush()
             #self.m_listCtrl1.InsertStringItem(index, aline.split(',')[0])
             #self.m_listCtrl1.SetStringItem(index, 1, aline.split(',')[1])
             #self.m_listCtrl1.SetStringItem(index, 2, aline.split(',')[2])
@@ -976,6 +616,7 @@ class KancolleHistMain ( wx.Frame ):
         # 最後の日付をリスト表示
         today = datetime.datetime.now()
         #print type(today)
+        print(date)
         self.ListCtrlChangeByDatetime(today.year, int(today.month), int(today.day))
 
         self.refreshShipTypeAndName()
@@ -993,6 +634,11 @@ def main():
 # -- 新バージョン(38カラム)
 #0    1    2    3    4      5        6        7      8      9        10     11     12           13             14            15         16 17 18-
 #日付,海域,マス,ボス,ランク,艦隊行動,味方陣形,敵陣形,制空権,味方触接,適触接,敵艦隊,ドロップ艦種,ドロップ艦むす,伊401改(Lv89),24/24,
+
+# ※海域＝海域番号（e.g. 1-1） 海域名
+
+# 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47
+# X  X0 X1 X2 X3 X4 X5 X6 X7 X8 X9 Y  Y0 Y1 Y2 Y3 Y4 Y5 Y6 Y7 Y8 Y9 Z0
 
 # ---- 解析後のログ(日付＞2017,1,1,12,15)
 # -- 旧バージョン
@@ -1012,8 +658,8 @@ def main():
     #print len(sys.argv)
     try:
         optlist, args = getopt.getopt(sys.argv[1:], "l:d:", ["help"])
-    except getopt.GetoptError, err:
-        print str(err)
+    except(getopt.GetoptError, err):
+        print(str(err))
         sys.exit(1)
 
     debug = 0
@@ -1027,15 +673,19 @@ def main():
         elif opt == '-l':
             infile = arg
         else:
-            print "python kancollehist.py [-l <log file>] [-d <debug level>]"
+            print("python kancollehist.py [-l <log file>] [-d <debug level>]")
             sys.exit(1)
 
     app = wx.App(0)
     #KtSystemContFrame(None,-1,'newdoc.xml - HRC System Control Frame')
-    ce = KancolleHistMain(None, debug, infile)
+    #ce = KancolleHistMain(None, debug, infile)
+    ce = KancolleHist(None, debug, infile)
+    ce.Show()
     #ce.readHistLog(infile)
 
     app.MainLoop()
+
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()
